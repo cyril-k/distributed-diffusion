@@ -64,7 +64,7 @@ def main():
                 print(
                     f"image {i} saved to ./results/stable_diffusion_3_result_{parallel_info}_{image_rank}.png"
                 )
-                timestamp = datetime.now()
+                timestamp = datetime.timestamp(datetime.now())
                 prof.export_chrome_trace(f"./results/trace_{timestamp}.json")
                 print(f"saved torch profiler output ot ./results/trace_{timestamp}.json")
 
