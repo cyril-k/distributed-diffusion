@@ -12,9 +12,13 @@ from xfuser.core.distributed import (
 )
 from xfuser.core.distributed.parallel_state import get_data_parallel_world_size
 from torch.profiler import profile, record_function, ProfilerActivity
-from datetime import datetime
-
-
+torch.manual_seed(42)
+import random
+random.seed(0)
+import numpy as np
+np.random.seed(0)
+TRACE_FOLDER = os.environ.get("TRACE_FOLDER", "traces")
+RANK = os.environ.get("RANK")
 
 def main():
     parser = FlexibleArgumentParser(description="xFuser Arguments")
@@ -64,9 +68,13 @@ def main():
                 print(
                     f"image {i} saved to ./results/stable_diffusion_3_result_{parallel_info}_{image_rank}.png"
                 )
-                timestamp = datetime.timestamp(datetime.now())
-                prof.export_chrome_trace(f"./results/trace_{timestamp}.json")
-                print(f"saved torch profiler output ot ./results/trace_{timestamp}.json")
+    
+    
+    if not os.path.exists(f"/model-storage/debug-results/{TRACE_FOLDER}"):
+        os.mkdir(f"/model-storage/debug-results/{TRACE_FOLDER}")
+    print("Saving profiler trace...")
+    prof.export_chrome_trace(f"/model-storage/debug-results/{TRACE_FOLDER}/trace-{TRACE_FOLDER}-{RANK}.json")
+    print(f"saved torch profiler output to /model-storage/debug-results/{TRACE_FOLDER}/trace-{TRACE_FOLDER}-{RANK}.json")
 
     if get_world_group().rank == get_world_group().world_size - 1:
         print(
